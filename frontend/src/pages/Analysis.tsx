@@ -359,14 +359,35 @@ const Analysis = () => {
         {/* Results */}
         {analysisRun && (
           <div className="space-y-8">
-            {/* ML Congestion Prediction - Only show in live mode */}
+            {/* 1. Network Topology - Core Deliverable */}
+            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up transition-all hover:border-primary/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-primary rounded-full" />
+                Network Topology
+                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full ml-2">
+                  Core Deliverable
+                </span>
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Dynamic visualization of the inferred fronthaul topology.
+                BBU at center, links in middle ring, cells on the outer ring.
+              </p>
+              <NetworkTopology />
+            </div>
+
+            {/* 2. Insights Panel - Topology Interpretation */}
+            <div className="animate-slide-up stagger-1">
+              <InsightsPanel linkData={linkData} cellTopology={currentCellTopology} />
+            </div>
+
+            {/* 3. ML Congestion Prediction - Optional Extension (Live Mode Only) */}
             {isLiveMode && (
               <div className="border border-primary/30 rounded-lg p-6 bg-card animate-slide-up transition-all hover:border-primary/50">
                 <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <div className="w-1 h-5 bg-primary rounded-full" />
                   ML Congestion Prediction
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full ml-2">
-                    Proactive
+                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full ml-2">
+                    Optional ML Extension
                   </span>
                 </h3>
                 <p className="text-sm text-muted-foreground mb-6">
@@ -377,14 +398,9 @@ const Analysis = () => {
               </div>
             )}
 
-            {/* Insights Panel */}
-            <div className="animate-slide-up stagger-1">
-              <InsightsPanel linkData={linkData} cellTopology={currentCellTopology} />
-            </div>
-
-            {/* Main Grid */}
+            {/* 4-5. Topology Mapping + Correlation Heatmap (Figure 1 Equivalent) */}
             <div className="grid lg:grid-cols-2 gap-8">
-              {/* Topology Mapping */}
+              {/* 4. Topology Mapping */}
               <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-2 transition-all hover:border-primary/30">
                 <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <div className="w-1 h-5 bg-primary rounded-full" />
@@ -397,16 +413,16 @@ const Analysis = () => {
                   )}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Cell to Link assignment based on traffic correlation analysis
+                  Cell to Link assignment inferred from correlated congestion events
                 </p>
                 <TopologyTable cellTopology={currentCellTopology} />
               </div>
 
-              {/* Correlation Heatmap */}
+              {/* 5. Correlation Heatmap */}
               <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-3 transition-all hover:border-accent/30">
                 <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <div className="w-1 h-5 bg-accent rounded-full" />
-                  Traffic Correlation
+                  Correlation Heatmap
                   {isLiveMode && (
                     <span className="text-xs text-green-400 ml-2 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -415,7 +431,7 @@ const Analysis = () => {
                   )}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Congestion correlation matrix revealing shared infrastructure
+                  Correlated congestion events used for topology inference (Figure 1)
                 </p>
                 <CorrelationHeatmap
                   liveCorrelation={isLiveMode && liveAnalysis ? liveAnalysis.correlation_matrix : undefined}
@@ -424,28 +440,14 @@ const Analysis = () => {
               </div>
             </div>
 
-            {/* Network Topology Visualization */}
+            {/* 6. Cell-wise Traffic Analysis */}
             <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-4 transition-all hover:border-primary/30">
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <div className="w-1 h-5 bg-primary rounded-full" />
-                Network Topology
-              </h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                Interactive visualization of the inferred fronthaul topology.
-                BBU at center, links in middle ring, cells on the outer ring.
-              </p>
-              <NetworkTopology />
-            </div>
-
-            {/* Cell-wise Traffic Visualization */}
-            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-5 transition-all hover:border-primary/30">
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <div className="w-1 h-5 bg-primary rounded-full" />
                 Cell-wise Traffic Analysis
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Compare throughput and packet loss patterns across individual cells.
-                Cells on the same link show correlated behavior during congestion.
+                Synchronized behavior of cells sharing the same link during congestion events.
               </p>
 
               <Tabs defaultValue="throughput" className="w-full">
@@ -462,8 +464,8 @@ const Analysis = () => {
               </Tabs>
             </div>
 
-            {/* Aggregated Link Traffic */}
-            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-6 transition-all hover:border-accent/30">
+            {/* 7. Aggregated Link Traffic */}
+            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-5 transition-all hover:border-accent/30">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -471,7 +473,7 @@ const Analysis = () => {
                     Aggregated Link Traffic
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Combined traffic of all cells per inferred fronthaul link
+                    Aggregate traffic of all cells per inferred fronthaul link
                   </p>
                 </div>
               </div>
@@ -512,32 +514,44 @@ const Analysis = () => {
               <TrafficChart linkIds={selectedLinks} />
             </div>
 
-            {/* Link Traffic Visualization (Figure 3 style) */}
-            <div className="border border-border rounded-lg p-6 bg-card animate-fade-in transition-all hover:border-purple-500/30">
+            {/* 8. Link Traffic (Per-Slot Resolution) - Figure 3 Equivalent */}
+            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-6 transition-all hover:border-purple-500/30">
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <div className="w-1 h-5 bg-purple-500 rounded-full" />
-                Link Traffic Analysis (Per-Slot Resolution)
+                Link Traffic (Per-Slot Resolution)
+                <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full ml-2">
+                  Figure 3
+                </span>
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                View aggregated traffic data per slot for each fronthaul link. Shows required capacity vs average data rate.
+                Per-slot data rate over time (60s window). Shows required FH link capacity vs average data rate.
               </p>
               <LinkTrafficVisualization />
             </div>
 
-            {/* Buffer Impact Analysis */}
-            <div className="border border-border rounded-lg p-6 bg-card animate-fade-in transition-all hover:border-warning/30">
+            {/* 9. Buffer Impact Analysis - Capacity Estimation */}
+            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-7 transition-all hover:border-warning/30">
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <div className="w-1 h-5 bg-warning rounded-full" />
                 Buffer Impact Analysis
+                <span className="text-xs bg-warning/20 text-warning px-2 py-0.5 rounded-full ml-2">
+                  4 symbols • 1% loss
+                </span>
               </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Capacity estimation with vs without buffer. Buffer size: 4 symbols (143µs), packet loss tolerance: up to 1%.
+              </p>
               <BufferAnalysis linkData={linkData} withBuffer={withBuffer} />
             </div>
 
-            {/* Summary Table */}
-            <div className="border border-border rounded-lg p-6 bg-card animate-fade-in transition-all hover:border-success/30">
+            {/* 10. Summary Table - Final Consolidated View */}
+            <div className="border border-border rounded-lg p-6 bg-card animate-slide-up stagger-8 transition-all hover:border-success/30">
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <div className="w-1 h-5 bg-success rounded-full" />
                 Summary Table
+                <span className="text-xs bg-success/20 text-success px-2 py-0.5 rounded-full ml-2">
+                  Final Results
+                </span>
                 {isLiveMode && (
                   <span className="text-xs text-green-400 ml-2 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -546,7 +560,7 @@ const Analysis = () => {
                 )}
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Complete overview of all fronthaul links with capacity requirements
+                Final consolidated view of link capacities and optimization impact
               </p>
               <SummaryTable linkData={linkData} cellTopology={currentCellTopology} />
             </div>
