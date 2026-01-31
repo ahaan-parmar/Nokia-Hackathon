@@ -103,6 +103,60 @@ def parse_throughput_file(filepath: str, cell_id: str) -> pd.DataFrame:
     return df
 
 
+def parse_throughput_file_indexed(filepath: str, cell_id: str) -> pd.DataFrame:
+    """
+    Parse a single throughput-cell-<id>.dat file with sequential symbol indexing.
+    
+    This version outputs symbol-indexed data suitable for slot conversion.
+    Each row represents one symbol measurement.
+    
+    File format (space-separated, 2 columns):
+        timestamp | bits_kbit
+    
+    Args:
+        filepath: Path to the .dat file
+        cell_id: Cell identifier to add as column
+    
+    Returns:
+        DataFrame with columns:
+            - cell_id: cell identifier
+            - symbol_index: sequential index starting from 0
+            - throughput_bits: throughput in bits (converted from kbit)
+    """
+    # read file (no header)
+    df = pd.read_csv(
+        filepath,
+        sep=r'\s+',
+        names=['timestamp', 'throughput_kbit'],
+        dtype={'timestamp': float, 'throughput_kbit': float}
+    )
+    
+    # sort by timestamp (as recommended in README)
+    df = df.sort_values('timestamp').reset_index(drop=True)
+    
+    # remove outliers: values significantly higher than typical
+    # using IQR method to detect outliers
+    q75 = df['throughput_kbit'].quantile(0.75)
+    q25 = df['throughput_kbit'].quantile(0.25)
+    iqr = q75 - q25
+    upper_bound = q75 + 3 * iqr  # conservative threshold
+    
+    # replace outliers with 0 (as recommended in README)
+    df.loc[df['throughput_kbit'] > upper_bound, 'throughput_kbit'] = 0
+    
+    # generate sequential symbol index (0, 1, 2, ...)
+    df['symbol_index'] = range(len(df))
+    
+    # convert kbit to bits (1 kbit = 1000 bits)
+    df['throughput_bits'] = df['throughput_kbit'] * 1000
+    
+    # add cell identifier
+    df['cell_id'] = cell_id
+    
+    # return only required columns
+    return df[['cell_id', 'symbol_index', 'throughput_bits']]
+
+
 def load_all_pkt_stats(data_dir: str) -> pd.DataFrame:
     """
     Load all pkt-stats-cell-*.dat files from a directory.
@@ -160,6 +214,46 @@ def load_all_throughput(data_dir: str) -> pd.DataFrame:
         all_data.append(df)
     
     combined = pd.concat(all_data, ignore_index=True)
+    return combined
+
+
+def load_all_throughput_indexed(data_dir: str) -> pd.DataFrame:
+    """
+    Load all throughput-cell-*.dat files with sequential symbol indexing.
+    
+    This function produces symbol-indexed data suitable for slot conversion.
+    Each cell's symbols are indexed independently starting from 0.
+    
+    Args:
+        data_dir: Path to directory containing .dat files
+    
+    Returns:
+        Combined DataFrame with columns:
+            - cell_id: cell identifier
+            - symbol_index: sequential index (per cell, starting from 0)
+            - throughput_bits: throughput in bits
+    """
+    pattern = os.path.join(data_dir, 'throughput-cell-*.dat')
+    files = glob.glob(pattern)
+    
+    if not files:
+        raise FileNotFoundError(f"No throughput files found in {data_dir}")
+    
+    all_data = []
+    for filepath in files:
+        # extract cell ID from filename
+        filename = os.path.basename(filepath)
+        cell_num = filename.replace('throughput-cell-', '').replace('.dat', '')
+        cell_id = f"cell_{cell_num}"
+        
+        df = parse_throughput_file_indexed(filepath, cell_id)
+        all_data.append(df)
+    
+    combined = pd.concat(all_data, ignore_index=True)
+    
+    # sort by cell_id and symbol_index for consistency
+    combined = combined.sort_values(['cell_id', 'symbol_index']).reset_index(drop=True)
+    
     return combined
 
 

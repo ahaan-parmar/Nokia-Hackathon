@@ -1,0 +1,115 @@
+{
+  "topology": {
+    "cell_9": "Link_1",
+    "cell_1": "Link_1",
+    "cell_17": "Link_1",
+    "cell_22": "Link_1",
+    "cell_8": "Link_2",
+    "cell_10": "Link_2",
+    "cell_19": "Link_2",
+    "cell_18": "Link_2",
+    "cell_5": "Link_3",
+    "cell_20": "Link_3",
+    "cell_12": "Link_3",
+    "cell_4": "Link_3",
+    "cell_13": "Link_4",
+    "cell_15": "Link_4",
+    "cell_7": "Link_4",
+    "cell_16": "Link_4",
+    "cell_23": "Link_5",
+    "cell_2": "Link_5",
+    "cell_24": "Link_5",
+    "cell_6": "Link_5",
+    "cell_11": "Link_6",
+    "cell_14": "Link_7",
+    "cell_21": "Link_8",
+    "cell_3": "Link_9"
+  },
+  "capacity": {
+    "no_buffer_gbps": {
+      "Link_1": 0.87,
+      "Link_2": 24.0,
+      "Link_3": 0.54,
+      "Link_4": 32.17,
+      "Link_5": 29.18,
+      "Link_6": 0.46,
+      "Link_7": 0.37,
+      "Link_8": 0.37,
+      "Link_9": 0.43
+    },
+    "with_buffer_gbps": {
+      "Link_1": 0.61,
+      "Link_2": 11.86,
+      "Link_3": 0.37,
+      "Link_4": 17.34,
+      "Link_5": 16.04,
+      "Link_6": 0.17,
+      "Link_7": 0.17,
+      "Link_8": 0.17,
+      "Link_9": 0.17
+    },
+    "comparison": {
+      "Link_1": {
+        "no_buffer_bits": 433080.0,
+        "with_buffer_bits": 306348.22259764874,
+        "reduction_bits": 126731.77740235126,
+        "reduction_percent": 29.26
+      },
+      "Link_2": {
+        "no_buffer_bits": 12000005.0,
+        "with_buffer_bits": 5930159.8840335915,
+        "reduction_bits": 6069845.1159664085,
+        "reduction_percent": 50.58
+      },
+      "Link_3": {
+        "no_buffer_bits": 269152.0,
+        "with_buffer_bits": 184227.6206103032,
+        "reduction_bits": 84924.37938969681,
+        "reduction_percent": 31.55
+      },
+      "Link_4": {
+        "no_buffer_bits": 16086460.0,
+        "with_buffer_bits": 8670854.782455612,
+        "reduction_bits": 7415605.217544388,
+        "reduction_percent": 46.1
+      },
+      "Link_5": {
+        "no_buffer_bits": 14591792.0,
+        "with_buffer_bits": 8018597.11947557,
+        "reduction_bits": 6573194.88052443,
+        "reduction_percent": 45.05
+      },
+      "Link_6": {
+        "no_buffer_bits": 231584.0,
+        "with_buffer_bits": 85390.40742241102,
+        "reduction_bits": 146193.59257758898,
+        "reduction_percent": 63.13
+      },
+      "Link_7": {
+        "no_buffer_bits": 185216.0,
+        "with_buffer_bits": 85348.85355030377,
+        "reduction_bits": 99867.14644969623,
+        "reduction_percent": 53.92
+      },
+      "Link_8": {
+        "no_buffer_bits": 185216.0,
+        "with_buffer_bits": 86673.96627253623,
+        "reduction_bits": 98542.03372746377,
+        "reduction_percent": 53.2
+      },
+      "Link_9": {
+        "no_buffer_bits": 216128.0,
+        "with_buffer_bits": 85346.17549081107,
+        "reduction_bits": 130781.82450918893,
+        "reduction_percent": 60.51
+      }
+    }
+  },
+  "parameters": {
+    "buffer_symbols": 4,
+    "buffer_time_us": 143,
+    "loss_tolerance": 0.01,
+    "slot_duration_us": 500,
+    "symbols_per_slot": 14
+  }
+}
