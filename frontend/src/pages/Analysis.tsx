@@ -15,10 +15,11 @@ import { BufferAnalysis } from "@/components/BufferAnalysis";
 import { SummaryTable } from "@/components/SummaryTable";
 import { InsightsPanel } from "@/components/InsightsPanel";
 import { NetworkTopology } from "@/components/NetworkTopology";
-import { 
-  runAnalysis, 
-  getCellStats, 
-  getLinkStats, 
+import { LinkTrafficVisualization } from "@/components/LinkTrafficVisualization";
+import {
+  runAnalysis,
+  getCellStats,
+  getLinkStats,
   checkBackendHealth,
   type CellStat,
   type LinkStat,
@@ -33,22 +34,22 @@ function AnimatedCounter({ value, duration = 1000 }: { value: number; duration?:
 
   useEffect(() => {
     startTimeRef.current = null;
-    
+
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
       const progress = Math.min((timestamp - startTimeRef.current) / duration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(Math.floor(easeOutQuart * value));
-      
+
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
       }
     };
-    
+
     animationRef.current = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
@@ -65,7 +66,7 @@ const Analysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [backendAvailable, setBackendAvailable] = useState<boolean | null>(null);
-  
+
   // Live data from backend
   const [liveAnalysis, setLiveAnalysis] = useState<AnalysisResult | null>(null);
   const [liveCellStats, setLiveCellStats] = useState<CellStat[] | null>(null);
@@ -133,7 +134,7 @@ const Analysis = () => {
 
   const handleRunAnalysis = async () => {
     setError(null);
-    
+
     if (isLiveMode) {
       setIsLoading(true);
       try {
@@ -142,7 +143,7 @@ const Analysis = () => {
           getCellStats(),
           getLinkStats(),
         ]);
-        
+
         setLiveAnalysis(analysis);
         setLiveCellStats(cellStats);
         setLiveLinkStats(linkStats);
@@ -191,7 +192,7 @@ const Analysis = () => {
             </div>
             <span className="font-semibold text-foreground">Fronthaul Analyzer</span>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -201,7 +202,7 @@ const Analysis = () => {
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-            
+
             {analysisRun && (
               <Button variant="outline" onClick={handleReset} className="gap-2 transition-all hover:scale-105">
                 <RefreshCw className="w-4 h-4" />
@@ -218,7 +219,7 @@ const Analysis = () => {
           <h2 className="text-sm font-medium text-muted-foreground mb-6">
             Analysis Configuration
           </h2>
-          
+
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-4">
               <Label className="text-sm text-muted-foreground w-24">Dataset</Label>
@@ -228,22 +229,21 @@ const Analysis = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
                   {datasets.map((dataset) => (
-                    <SelectItem 
-                      key={dataset.id} 
-                      value={dataset.id} 
+                    <SelectItem
+                      key={dataset.id}
+                      value={dataset.id}
                       className="py-2 transition-colors"
                       disabled={dataset.id === "live-analysis" && backendAvailable === false}
                     >
                       <div className="flex items-center gap-2">
                         <span>{dataset.name}</span>
                         {dataset.id === "live-analysis" && (
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded transition-all ${
-                            backendAvailable === true 
-                              ? "bg-green-500/20 text-green-400" 
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded transition-all ${backendAvailable === true
+                              ? "bg-green-500/20 text-green-400"
                               : backendAvailable === false
                                 ? "bg-red-500/20 text-red-400"
                                 : "bg-yellow-500/20 text-yellow-400"
-                          }`}>
+                            }`}>
                             {backendAvailable === true ? "Online" : backendAvailable === false ? "Offline" : "Checking..."}
                           </span>
                         )}
@@ -254,9 +254,9 @@ const Analysis = () => {
               </Select>
 
               <div className="flex items-center gap-3 h-10 px-4 rounded-lg bg-secondary/50 transition-all hover:bg-secondary/70">
-                <Switch 
-                  id="buffer-mode" 
-                  checked={withBuffer} 
+                <Switch
+                  id="buffer-mode"
+                  checked={withBuffer}
                   onCheckedChange={setWithBuffer}
                   className="data-[state=checked]:bg-primary"
                 />
@@ -265,7 +265,7 @@ const Analysis = () => {
                 </Label>
               </div>
 
-              <Button 
+              <Button
                 onClick={handleRunAnalysis}
                 disabled={!selectedDataset || isLoading}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-6 h-10 transition-all hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
@@ -308,7 +308,7 @@ const Analysis = () => {
           <div className="border border-green-500/30 rounded-lg p-5 mb-8 bg-green-500/5 relative overflow-hidden animate-slide-up">
             {/* Flowing data effect */}
             <div className="absolute inset-0 data-flow-bg opacity-30" />
-            
+
             <div className="relative">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative">
@@ -319,7 +319,7 @@ const Analysis = () => {
                 </div>
                 <span className="font-semibold text-green-400 text-lg">Live Analysis Results</span>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="animate-slide-up stagger-1">
                   <div className="text-muted-foreground text-sm mb-1">Data Points</div>
@@ -346,7 +346,7 @@ const Analysis = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                 Algorithm: {liveSummary.algorithm} • Source: {liveSummary.data_source}
@@ -398,7 +398,7 @@ const Analysis = () => {
                 <p className="text-sm text-muted-foreground mb-6">
                   Congestion correlation matrix revealing shared infrastructure
                 </p>
-                <CorrelationHeatmap 
+                <CorrelationHeatmap
                   liveCorrelation={isLiveMode && liveAnalysis ? liveAnalysis.correlation_matrix : undefined}
                   liveTopology={isLiveMode && liveAnalysis ? liveAnalysis.topology : undefined}
                 />
@@ -412,7 +412,7 @@ const Analysis = () => {
                 Network Topology
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Interactive visualization of the inferred fronthaul topology. 
+                Interactive visualization of the inferred fronthaul topology.
                 BBU at center, links in middle ring, cells on the outer ring.
               </p>
               <NetworkTopology />
@@ -425,10 +425,10 @@ const Analysis = () => {
                 Cell-wise Traffic Analysis
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Compare throughput and packet loss patterns across individual cells. 
+                Compare throughput and packet loss patterns across individual cells.
                 Cells on the same link show correlated behavior during congestion.
               </p>
-              
+
               <Tabs defaultValue="throughput" className="w-full">
                 <TabsList className="mb-4">
                   <TabsTrigger value="throughput" className="transition-all">Throughput</TabsTrigger>
@@ -489,8 +489,20 @@ const Analysis = () => {
                   </label>
                 ))}
               </div>
-              
+
               <TrafficChart linkIds={selectedLinks} />
+            </div>
+
+            {/* Link Traffic Visualization (Figure 3 style) */}
+            <div className="border border-border rounded-lg p-6 bg-card animate-fade-in transition-all hover:border-purple-500/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-purple-500 rounded-full" />
+                Link Traffic Analysis (Per-Slot Resolution)
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                View aggregated traffic data per slot for each fronthaul link. Shows required capacity vs average data rate.
+              </p>
+              <LinkTrafficVisualization />
             </div>
 
             {/* Buffer Impact Analysis */}

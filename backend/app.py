@@ -3,7 +3,7 @@ Academic Evaluation-1 Backend
 5G Fronthaul Topology Inference
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
@@ -13,13 +13,18 @@ from services.data_loader import load_data
 from services.congestion import detect_congestion
 from services.correlation import compute_congestion_correlation
 from services.topology import infer_topology
-from services.raw_data_parser import load_all_pkt_stats, load_all_throughput
+from services.raw_data_parser import load_all_pkt_stats, load_all_throughput, load_all_throughput_indexed
+from services.slot_conversion import convert_symbols_to_slots
+from services.link_aggregation import aggregate_slot_traffic_by_link
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend
 
 # Path to traffic data (directory with raw .dat files)
 DATA_PATH = "data/raw"
+
+# Constants
+SLOT_DURATION_SECONDS = 500e-6  # 500 microseconds
 
 # Cache for processed data (avoid re-processing on every request)
 _cache = {}
@@ -291,6 +296,137 @@ def congestion_timeline():
             "timeline": result,
             "topology": topology
         })
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def get_cached_link_traffic():
+    """Get or compute cached link traffic data."""
+    if 'link_traffic' not in _cache:
+        print("Loading throughput data for link traffic (this may take a while)...")
+        
+        # Get topology first
+        analysis = get_cached_analysis()
+        topology = analysis['topology']
+        
+        # Load and process throughput data
+        throughput_df = load_all_throughput_indexed(DATA_PATH)
+        slot_df = convert_symbols_to_slots(throughput_df)
+        link_traffic_df = aggregate_slot_traffic_by_link(slot_df, topology)
+        
+        # Add time column
+        link_traffic_df['time_seconds'] = link_traffic_df['slot_id'] * SLOT_DURATION_SECONDS
+        
+        _cache['link_traffic'] = link_traffic_df
+        print("Link traffic data cached.")
+    
+    return _cache['link_traffic']
+
+
+@app.route("/api/link-traffic/<int:link_id>")
+def get_link_traffic(link_id):
+    """
+    Get time series data for a specific link's aggregated traffic.
+    
+    Returns data suitable for plotting like Figure 3:
+    - Time in seconds
+    - Data rate in Gbps per slot
+    - Average and peak values
+    
+    Query params:
+        duration (float): Time window in seconds (default: 60)
+        sample_rate (int): Sample every Nth slot to reduce data (default: auto)
+    """
+    try:
+        duration = float(request.args.get('duration', 60))
+        
+        link_traffic_df = get_cached_link_traffic()
+        link_name = f"Link_{link_id}"
+        col_name = f"{link_name}_bits"
+        
+        if col_name not in link_traffic_df.columns:
+            return jsonify({"error": f"Link {link_id} not found"}), 404
+        
+        # Filter to requested duration
+        filtered_df = link_traffic_df[link_traffic_df['time_seconds'] <= duration].copy()
+        
+        # Get data
+        time_data = filtered_df['time_seconds'].values
+        bits_data = filtered_df[col_name].values
+        
+        # Convert bits per slot to Gbps
+        gbps_data = bits_data / SLOT_DURATION_SECONDS / 1e9
+        
+        # Calculate statistics
+        avg_gbps = float(np.mean(gbps_data))
+        peak_gbps = float(np.max(gbps_data))
+        
+        # Sample data if too many points (aim for ~1000 points max)
+        total_points = len(time_data)
+        sample_rate = request.args.get('sample_rate')
+        if sample_rate:
+            sample_rate = int(sample_rate)
+        else:
+            sample_rate = max(1, total_points // 1000)
+        
+        sampled_time = time_data[::sample_rate].tolist()
+        sampled_gbps = gbps_data[::sample_rate].tolist()
+        
+        # Get cells on this link
+        analysis = get_cached_analysis()
+        topology = analysis['topology']
+        cells = [cell for cell, link in topology.items() if link == link_name]
+        
+        return jsonify({
+            "linkId": link_id,
+            "linkName": link_name,
+            "cells": sorted(cells, key=lambda x: int(x.split('_')[1])),
+            "duration": duration,
+            "totalSlots": total_points,
+            "sampledPoints": len(sampled_time),
+            "sampleRate": sample_rate,
+            "averageGbps": round(avg_gbps, 4),
+            "peakGbps": round(peak_gbps, 4),
+            "data": [
+                {"time": round(t, 6), "gbps": round(g, 4)}
+                for t, g in zip(sampled_time, sampled_gbps)
+            ]
+        })
+    
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
+
+@app.route("/api/all-links-info")
+def get_all_links_info():
+    """
+    Get summary info for all links (for dropdown selection).
+    """
+    try:
+        analysis = get_cached_analysis()
+        topology = analysis['topology']
+        
+        # Group cells by link
+        links = {}
+        for cell_id, link_name in topology.items():
+            if link_name not in links:
+                links[link_name] = []
+            links[link_name].append(cell_id)
+        
+        result = []
+        for link_name in sorted(links.keys(), key=lambda x: int(x.split('_')[1])):
+            link_id = int(link_name.split('_')[1])
+            cells = sorted(links[link_name], key=lambda x: int(x.split('_')[1]))
+            result.append({
+                "linkId": link_id,
+                "linkName": link_name,
+                "cells": cells,
+                "cellCount": len(cells)
+            })
+        
+        return jsonify({"links": result})
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
