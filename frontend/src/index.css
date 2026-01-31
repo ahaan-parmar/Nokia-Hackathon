@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fronthaul Network Analysis Design System
+   Dark theme with network-operations-center aesthetic
+   All colors in HSL format */
+
+@layer base {
+  :root {
+    /* Dark theme by default */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 187 92% 50%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 210 40% 90%;
+
+    --muted: 222 30% 12%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 280 82% 65%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 30% 18%;
+    --input: 222 30% 16%;
+    --ring: 187 92% 50%;
+
+    --radius: 0.75rem;
+
+    /* Link colors for topology visualization */
+    --link-1: 187 92% 50%;
+    --link-2: 280 82% 65%;
+    --link-3: 45 93% 58%;
+    --link-4: 142 76% 46%;
+    --link-5: 0 84% 60%;
+    --link-6: 200 98% 50%;
+
+    /* Status colors */
+    --success: 142 76% 46%;
+    --warning: 45 93% 58%;
+    --danger: 0 84% 60%;
+
+    /* Chart colors */
+    --chart-1: 187 92% 50%;
+    --chart-2: 280 82% 65%;
+    --chart-3: 45 93% 58%;
+    --chart-4: 142 76% 46%;
+    --chart-5: 200 98% 50%;
+
+    /* Gradient definitions */
+    --gradient-primary: linear-gradient(135deg, hsl(187 92% 50%) 0%, hsl(200 98% 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(280 82% 65%) 0%, hsl(320 82% 60%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(222 47% 10%) 0%, hsl(222 47% 6%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(187 92% 50% / 0.15) 0%, transparent 70%);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsl(222 47% 4% / 0.3);
+    --shadow-md: 0 4px 16px hsl(222 47% 4% / 0.4);
+    --shadow-lg: 0 8px 32px hsl(222 47% 4% / 0.5);
+    --shadow-glow: 0 0 30px hsl(187 92% 50% / 0.3);
+
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 187 92% 50%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 222 30% 14%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 222 30% 18%;
+    --sidebar-ring: 187 92% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer utilities {
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.2);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.4), 0 0 40px hsl(var(--accent) / 0.2);
+  }
+
+  /* Glass effect */
+  .glass {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Grid pattern background */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Pulse animation for live data */
+  .pulse-live {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 20px 4px hsl(var(--primary) / 0.2);
+    }
+  }
+
+  /* Link color utilities */
+  .text-link-1 { color: hsl(var(--link-1)); }
+  .text-link-2 { color: hsl(var(--link-2)); }
+  .text-link-3 { color: hsl(var(--link-3)); }
+  .text-link-4 { color: hsl(var(--link-4)); }
+  .text-link-5 { color: hsl(var(--link-5)); }
+  .text-link-6 { color: hsl(var(--link-6)); }
+
+  .bg-link-1 { background-color: hsl(var(--link-1)); }
+  .bg-link-2 { background-color: hsl(var(--link-2)); }
+  .bg-link-3 { background-color: hsl(var(--link-3)); }
+  .bg-link-4 { background-color: hsl(var(--link-4)); }
+  .bg-link-5 { background-color: hsl(var(--link-5)); }
+  .bg-link-6 { background-color: hsl(var(--link-6)); }
+
+  .border-link-1 { border-color: hsl(var(--link-1)); }
+  .border-link-2 { border-color: hsl(var(--link-2)); }
+  .border-link-3 { border-color: hsl(var(--link-3)); }
+  .border-link-4 { border-color: hsl(var(--link-4)); }
+  .border-link-5 { border-color: hsl(var(--link-5)); }
+  .border-link-6 { border-color: hsl(var(--link-6)); }
+}
