@@ -512,6 +512,9 @@ def get_all_links_info():
             })
         
         return jsonify({"links": result})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # =============================================================================
 # ML CONGESTION PREDICTION ENDPOINTS

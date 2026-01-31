@@ -17,10 +17,10 @@ import { InsightsPanel } from "@/components/InsightsPanel";
 import { NetworkTopology } from "@/components/NetworkTopology";
 import { LinkTrafficVisualization } from "@/components/LinkTrafficVisualization";
 import { CongestionPrediction } from "@/components/CongestionPrediction";
-import { 
-  runAnalysis, 
-  getCellStats, 
-  getLinkStats, 
+import {
+  runAnalysis,
+  getCellStats,
+  getLinkStats,
   checkBackendHealth,
   type CellStat,
   type LinkStat,
@@ -240,10 +240,10 @@ const Analysis = () => {
                         <span>{dataset.name}</span>
                         {dataset.id === "live-analysis" && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded transition-all ${backendAvailable === true
-                              ? "bg-green-500/20 text-green-400"
-                              : backendAvailable === false
-                                ? "bg-red-500/20 text-red-400"
-                                : "bg-yellow-500/20 text-yellow-400"
+                            ? "bg-green-500/20 text-green-400"
+                            : backendAvailable === false
+                              ? "bg-red-500/20 text-red-400"
+                              : "bg-yellow-500/20 text-yellow-400"
                             }`}>
                             {backendAvailable === true ? "Online" : backendAvailable === false ? "Offline" : "Checking..."}
                           </span>
@@ -370,7 +370,7 @@ const Analysis = () => {
                   </span>
                 </h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Machine learning model predicts congestion risk before it happens. 
+                  Machine learning model predicts congestion risk before it happens.
                   Risk scores indicate likelihood of congestion in the next time slot.
                 </p>
                 <CongestionPrediction />
