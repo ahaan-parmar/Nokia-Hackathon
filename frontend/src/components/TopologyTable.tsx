@@ -23,7 +23,7 @@ export function TopologyTable({ cellTopology }: TopologyTableProps) {
 
   return (
     <ScrollArea className="h-[450px]">
-      <div className="space-y-6">
+      <div className="space-y-6 pr-4 pb-6">
         {/* Shared Links */}
         <div>
           <h4 className="text-sm font-medium text-muted-foreground mb-3">

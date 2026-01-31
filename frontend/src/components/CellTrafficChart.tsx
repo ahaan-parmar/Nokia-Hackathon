@@ -141,9 +141,9 @@ export function CellTrafficChart({ mode }: CellTrafficChartProps) {
           {sharedLinks.map(([linkId, cells]) => {
             const color = linkColors[parseInt(linkId)];
             return (
-              <div key={linkId} className="flex flex-wrap items-center gap-2">
+              <div key={linkId} className="grid grid-cols-[70px_repeat(4,100px)] items-center gap-1">
                 <span
-                  className="text-xs font-medium w-14"
+                  className="text-xs font-medium"
                   style={{ color }}
                 >
                   Link_{linkId}:
@@ -173,8 +173,8 @@ export function CellTrafficChart({ mode }: CellTrafficChartProps) {
         {/* Isolated cells */}
         {isolatedLinks.length > 0 && (
           <div className="pt-2 border-t border-border">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground w-14">
+            <div className="grid grid-cols-[70px_repeat(4,100px)] items-center gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
                 Isolated:
               </span>
               {isolatedLinks.map(([linkId, cells]) => {
