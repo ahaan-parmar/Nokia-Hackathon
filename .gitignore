@@ -8,8 +8,6 @@ venv/
 env/
 
 # Data files (too large for git)
-backend/data/raw/*.dat
-backend/data/raw/*.pdf
 
 # Dependencies (Frontend)
 node_modules/
