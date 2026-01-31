@@ -14,7 +14,6 @@ import { CorrelationHeatmap } from "@/components/CorrelationHeatmap";
 import { BufferAnalysis } from "@/components/BufferAnalysis";
 import { SummaryTable } from "@/components/SummaryTable";
 import { InsightsPanel } from "@/components/InsightsPanel";
-import { NetworkTopology3D } from "@/components/NetworkTopology3D";
 
 const Analysis = () => {
   const [selectedDataset, setSelectedDataset] = useState<string>("");
@@ -177,19 +176,6 @@ const Analysis = () => {
                 </p>
                 <CorrelationHeatmap />
               </div>
-            </div>
-
-            {/* 3D Network Topology */}
-            <div className="border border-border rounded-lg p-6 bg-card relative">
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <div className="w-1 h-5 bg-primary rounded-full" />
-                3D Network Topology
-              </h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                Interactive 3D visualization of the inferred fronthaul topology. 
-                BBU at center, cells grouped by shared links.
-              </p>
-              <NetworkTopology3D />
             </div>
 
             {/* Cell-wise Traffic Visualization */}
