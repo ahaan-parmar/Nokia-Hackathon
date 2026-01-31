@@ -1,3 +1,8 @@
+# Core dependencies
 flask
+flask-cors
 pandas
 numpy
+
+# Machine Learning dependencies for congestion prediction
+scikit-learn

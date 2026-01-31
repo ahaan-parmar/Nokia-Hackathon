@@ -145,3 +145,226 @@ export async function getCongestionTimeline(): Promise<{
   }
   return response.json();
 }
+
+// =============================================================================
+// ML CONGESTION PREDICTION APIs
+// =============================================================================
+
+export interface CellPrediction {
+  cellId: string;
+  riskScore: number;
+  riskCategory: "Low" | "Medium" | "High" | "Critical";
+  currentThroughput: number;
+  currentPacketLoss: number;
+}
+
+export interface PredictionResult {
+  model: string;
+  predictionHorizon: string;
+  predictions: CellPrediction[];
+  summary: {
+    totalCells: number;
+    criticalRisk: number;
+    highRisk: number;
+    mediumRisk: number;
+    lowRisk: number;
+  };
+}
+
+export interface ModelInfo {
+  source: string;
+  models: Record<string, {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1_score: number;
+    roc_auc: number;
+  }>;
+  best_model: string;
+  best_model_name?: string;
+  features_used: number;
+}
+
+export interface FeatureImportance {
+  source: string;
+  model: string;
+  features: Record<string, number>;
+  descriptions?: Record<string, string>;
+}
+
+export interface RiskStreamPoint {
+  bucket: number;
+  time: number;
+  avgRisk: number;
+  maxRisk: number;
+  minRisk: number;
+  stdRisk: number;
+  criticalCount: number;
+  highRiskCount: number;
+  dataPoints: number;
+  avgThroughput: number;
+  totalPacketLoss: number;
+}
+
+export interface RiskStreamResult {
+  model: string;
+  stream: RiskStreamPoint[];
+  summary: {
+    totalBuckets: number;
+    timeRange: number;
+    bucketSize: number;
+    overallAvgRisk: number;
+    overallMaxRisk: number;
+  };
+}
+
+/**
+ * Get congestion predictions for all cells
+ */
+export async function getPredictions(): Promise<PredictionResult> {
+  const response = await fetch(`${API_BASE}/api/predict-congestion`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch predictions: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get ML model information and metrics
+ */
+export async function getModelInfo(): Promise<ModelInfo> {
+  const response = await fetch(`${API_BASE}/api/model-info`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch model info: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get feature importance from the best model
+ */
+export async function getFeatureImportance(): Promise<FeatureImportance> {
+  const response = await fetch(`${API_BASE}/api/feature-importance`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch feature importance: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get risk stream over time (for charts)
+ */
+export async function getRiskStream(buckets: number = 50): Promise<RiskStreamResult> {
+  const response = await fetch(`${API_BASE}/api/risk-stream?buckets=${buckets}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch risk stream: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get detailed risk for a specific cell
+ */
+export async function getCellRisk(cellId: string): Promise<{
+  cellId: string;
+  model: string;
+  currentRisk: { score: number; category: string };
+  riskTimeline: Array<{ time: number; riskScore: number; throughput: number; packetLoss: number }>;
+  statistics: {
+    totalDataPoints: number;
+    avgRiskScore: number;
+    maxRiskScore: number;
+    highRiskPeriods: number;
+  };
+}> {
+  const response = await fetch(`${API_BASE}/api/cell-risk/${cellId}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch cell risk: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// =============================================================================
+// LIVE STREAMING APIs
+// =============================================================================
+
+export interface LiveCell {
+  cellId: string;
+  riskScore: number;
+  riskCategory: "Low" | "Medium" | "High" | "Critical";
+  throughput: number;
+  packetLoss: number;
+  isCongested: boolean;
+}
+
+export interface LiveTimepoint {
+  timestamp: number;
+  relativeTime: number;
+  cells: LiveCell[];
+  summary: {
+    maxRisk: number;
+    avgRisk: number;
+    criticalCount: number;
+    highRiskCount: number;
+    congestedCount: number;
+    totalCells: number;
+  };
+}
+
+export interface LiveStreamResult {
+  status: string;
+  timeline: LiveTimepoint[];
+  pagination: {
+    startIndex: number;
+    endIndex: number;
+    step: number;
+    totalTimestamps: number;
+    progress: number;
+    hasMore: boolean;
+  };
+  batchSummary: {
+    avgRisk: number;
+    maxRisk: number;
+    totalDataPoints: number;
+  };
+}
+
+export interface LiveSnapshotResult {
+  timestamp: number;
+  index: number;
+  totalTimestamps: number;
+  progress: number;
+  cells: LiveCell[];
+  summary: {
+    criticalCount: number;
+    highRiskCount: number;
+    mediumRiskCount: number;
+    lowRiskCount: number;
+    congestedCount: number;
+  };
+}
+
+/**
+ * Get next batch of live stream data
+ */
+export async function getLiveStream(action: 'next' | 'start' | 'stop' | 'reset' | 'status' = 'next', step: number = 10): Promise<LiveStreamResult> {
+  const response = await fetch(`${API_BASE}/api/live-stream?action=${action}&step=${step}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch live stream: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get current snapshot at specific index
+ */
+export async function getLiveSnapshot(index?: number): Promise<LiveSnapshotResult> {
+  const url = index !== undefined 
+    ? `${API_BASE}/api/live-snapshot?index=${index}`
+    : `${API_BASE}/api/live-snapshot`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch snapshot: ${response.statusText}`);
+  }
+  return response.json();
+}

@@ -15,6 +15,7 @@ import { BufferAnalysis } from "@/components/BufferAnalysis";
 import { SummaryTable } from "@/components/SummaryTable";
 import { InsightsPanel } from "@/components/InsightsPanel";
 import { NetworkTopology } from "@/components/NetworkTopology";
+import { CongestionPrediction } from "@/components/CongestionPrediction";
 import { 
   runAnalysis, 
   getCellStats, 
@@ -358,6 +359,24 @@ const Analysis = () => {
         {/* Results */}
         {analysisRun && (
           <div className="space-y-8">
+            {/* ML Congestion Prediction - Only show in live mode */}
+            {isLiveMode && (
+              <div className="border border-primary/30 rounded-lg p-6 bg-card animate-slide-up transition-all hover:border-primary/50">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <div className="w-1 h-5 bg-primary rounded-full" />
+                  ML Congestion Prediction
+                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full ml-2">
+                    Proactive
+                  </span>
+                </h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Machine learning model predicts congestion risk before it happens. 
+                  Risk scores indicate likelihood of congestion in the next time slot.
+                </p>
+                <CongestionPrediction />
+              </div>
+            )}
+
             {/* Insights Panel */}
             <div className="animate-slide-up stagger-1">
               <InsightsPanel linkData={linkData} cellTopology={currentCellTopology} />

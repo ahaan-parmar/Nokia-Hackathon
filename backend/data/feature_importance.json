@@ -1,0 +1,37 @@
+{
+  "model": "Gradient Boosting",
+  "features": {
+    "slots_since_last_congestion": 0.9537100166660927,
+    "link_total_throughput": 0.01287401239006923,
+    "link_congestion_ratio": 0.004480960352281202,
+    "throughput_diff_1": 0.0035629954162524798,
+    "link_avg_throughput": 0.003462808003893525,
+    "throughput": 0.0023299550161519945,
+    "burstiness_coef_10": 0.0022831100231068733,
+    "burstiness_coef_5": 0.001686705587833593,
+    "throughput_diff_2": 0.0012061901406484187,
+    "burstiness_coef_20": 0.0010426521605146801,
+    "throughput_diff_10": 0.0009739316564415681,
+    "throughput_slope_10": 0.0009200083722648596,
+    "throughput_lag_1": 0.0009051211743250356,
+    "throughput_var_5": 0.0006443589907686149,
+    "throughput_var_10": 0.0006322539625068142
+  },
+  "descriptions": {
+    "slots_since_last_congestion": "Number of slots since last congestion event. Lower values indicate active congestion episode.",
+    "link_total_throughput": "Total throughput across all cells on the same link. Higher values indicate more competition for shared bandwidth.",
+    "link_congestion_ratio": "Fraction of cells on the link that are congested. High ratio indicates link-wide congestion.",
+    "throughput_diff_1": "Throughput change from 1 slots ago. Rate of change indicator.",
+    "link_avg_throughput": "Average throughput per cell on the shared link. Indicates per-cell share of link capacity.",
+    "throughput": "N/A",
+    "burstiness_coef_10": "Coefficient of variation over 10 slots. Normalized burstiness measure.",
+    "burstiness_coef_5": "Coefficient of variation over 5 slots. Normalized burstiness measure.",
+    "throughput_diff_2": "Throughput change from 2 slots ago. Rate of change indicator.",
+    "burstiness_coef_20": "Coefficient of variation over 20 slots. Normalized burstiness measure.",
+    "throughput_diff_10": "Throughput change from 10 slots ago. Rate of change indicator.",
+    "throughput_slope_10": "Throughput trend over 10 slots. Positive values indicate increasing load.",
+    "throughput_lag_1": "Throughput value from 1 slots ago. Captures delayed temporal patterns.",
+    "throughput_var_5": "Variance of throughput over 5 slots. Emphasizes large deviations from mean.",
+    "throughput_var_10": "Variance of throughput over 10 slots. Emphasizes large deviations from mean."
+  }
+}
