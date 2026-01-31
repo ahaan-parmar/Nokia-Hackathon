@@ -1,14 +1,14 @@
 import { useMemo } from "react";
-import { generateCorrelationMatrix, cellTopology } from "@/data/networkData";
+import { generateCorrelationMatrix, cellTopology, linkColors } from "@/data/networkData";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function CorrelationHeatmap() {
   const { cells, matrix } = useMemo(() => generateCorrelationMatrix(), []);
-  
+
   // Group cells by link for better visualization
   const cellLinkMap = useMemo(() => {
     const map: Record<string, number> = {};
-    cellTopology.forEach(cell => {
+    cellTopology.forEach((cell) => {
       map[cell.cellId] = cell.linkId;
     });
     return map;
@@ -22,63 +22,77 @@ export function CorrelationHeatmap() {
     return "bg-secondary";
   };
 
-  // Show only first 12 cells for better visibility
-  const displayCells = cells.slice(0, 12);
-  const displayMatrix = matrix.slice(0, 12).map(row => row.slice(0, 12));
+  // Show first 16 cells for better visibility of correlation patterns
+  const displayCells = cells.slice(0, 16);
+  const displayMatrix = matrix.slice(0, 16).map((row) => row.slice(0, 16));
 
   return (
     <div className="space-y-4">
       <div className="text-xs text-muted-foreground">
         High correlation (bright) indicates cells sharing the same fronthaul link
       </div>
-      
+
       <div className="overflow-auto">
         <div className="inline-block min-w-max">
           {/* Header */}
           <div className="flex">
-            <div className="w-16 h-8" />
-            {displayCells.map((cell, i) => (
-              <div 
-                key={cell} 
-                className="w-8 h-8 flex items-center justify-center text-[10px] text-muted-foreground -rotate-45 origin-center"
-              >
-                {i + 1}
-              </div>
-            ))}
+            <div className="w-14 h-7" />
+            {displayCells.map((cell) => {
+              const linkId = cellLinkMap[cell];
+              const color = linkColors[linkId] || "#888";
+              return (
+                <div
+                  key={cell}
+                  className="w-7 h-7 flex items-center justify-center text-[9px] -rotate-45 origin-center"
+                  style={{ color }}
+                >
+                  {cell.replace("cell_", "")}
+                </div>
+              );
+            })}
           </div>
-          
+
           {/* Matrix */}
-          {displayMatrix.map((row, i) => (
-            <div key={displayCells[i]} className="flex items-center">
-              <div className="w-16 h-8 flex items-center text-xs text-muted-foreground pr-2">
-                Cell-{String(i + 1).padStart(2, '0')}
+          {displayMatrix.map((row, i) => {
+            const cellId = displayCells[i];
+            const linkId = cellLinkMap[cellId];
+            const color = linkColors[linkId] || "#888";
+            return (
+              <div key={cellId} className="flex items-center">
+                <div
+                  className="w-14 h-7 flex items-center text-[10px] pr-1"
+                  style={{ color }}
+                >
+                  {cellId}
+                </div>
+                {row.map((value, j) => (
+                  <Tooltip key={j}>
+                    <TooltipTrigger>
+                      <div
+                        className={`w-7 h-7 ${getColor(value)} border border-background/20 hover:opacity-80`}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-popover border-border">
+                      <div className="text-xs">
+                        <div className="font-medium">
+                          {displayCells[i]} ↔ {displayCells[j]}
+                        </div>
+                        <div className="text-muted-foreground">
+                          Correlation: {(value * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-muted-foreground">
+                          {cellLinkMap[displayCells[i]] ===
+                          cellLinkMap[displayCells[j]]
+                            ? `Same Link (Link_${cellLinkMap[displayCells[i]]})`
+                            : "Different Links"}
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
               </div>
-              {row.map((value, j) => (
-                <Tooltip key={j}>
-                  <TooltipTrigger>
-                    <div 
-                      className={`w-8 h-8 ${getColor(value)} border border-background/20 transition-opacity hover:opacity-80`}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-popover border-border">
-                    <div className="text-xs">
-                      <div className="font-medium">
-                        {displayCells[i]} ↔ {displayCells[j]}
-                      </div>
-                      <div className="text-muted-foreground">
-                        Correlation: {(value * 100).toFixed(1)}%
-                      </div>
-                      <div className="text-muted-foreground">
-                        {cellLinkMap[displayCells[i]] === cellLinkMap[displayCells[j]] 
-                          ? `Same Link (${cellLinkMap[displayCells[i]]})` 
-                          : 'Different Links'}
-                      </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -88,7 +102,7 @@ export function CorrelationHeatmap() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <div className="w-4 h-4 bg-secondary rounded" />
-            <span>Low</span>
+            <span>Low (&lt;20%)</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-4 h-4 bg-accent/60 rounded" />
@@ -96,7 +110,7 @@ export function CorrelationHeatmap() {
           </div>
           <div className="flex items-center gap-1">
             <div className="w-4 h-4 bg-primary rounded" />
-            <span>High</span>
+            <span>High (&gt;70%)</span>
           </div>
         </div>
       </div>

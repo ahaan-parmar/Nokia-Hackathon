@@ -9,14 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { generateTrafficData, calculateLinkData } from "@/data/networkData";
-
-const COLOR_MAP: Record<number, string> = {
-  1: "#22d3ee",
-  2: "#c084fc",
-  3: "#facc15",
-  4: "#4ade80",
-};
+import { generateTrafficData, calculateLinkData, linkColors } from "@/data/networkData";
 
 interface TrafficChartProps {
   linkIds: number[];
@@ -84,7 +77,7 @@ export function TrafficChart({ linkIds }: TrafficChartProps) {
           >
             <div
               className="w-2 h-8 rounded shrink-0"
-              style={{ backgroundColor: COLOR_MAP[s.linkId] ?? COLOR_MAP[1] }}
+              style={{ backgroundColor: linkColors[s.linkId] ?? "#888" }}
             />
             <div>
               <div className="text-xs text-muted-foreground">
@@ -108,7 +101,7 @@ export function TrafficChart({ linkIds }: TrafficChartProps) {
           >
             <defs>
               {linkIds.map((id) => {
-                const color = COLOR_MAP[id] ?? COLOR_MAP[1];
+                const color = linkColors[id] ?? "#888";
                 return (
                   <linearGradient
                     key={id}
@@ -164,7 +157,7 @@ export function TrafficChart({ linkIds }: TrafficChartProps) {
               formatter={(value) => `Link ${value.replace("link_", "")}`}
             />
             {linkIds.map((id) => {
-              const color = COLOR_MAP[id] ?? COLOR_MAP[1];
+              const color = linkColors[id] ?? "#888";
               return (
                 <Area
                   key={id}

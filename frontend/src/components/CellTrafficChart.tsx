@@ -10,7 +10,7 @@ import {
   Legend,
 } from "recharts";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cellTopology, linkColorClasses } from "@/data/networkData";
+import { cellTopology, linkColors } from "@/data/networkData";
 
 // Generate per-cell traffic data with correlation for same-link cells
 function generateCellTrafficData(cellId: string, duration: number = 300) {
@@ -22,22 +22,26 @@ function generateCellTrafficData(cellId: string, duration: number = 300) {
 
   // Seed based on linkId for correlation
   const linkSeed = linkId * 1000;
-  const cellSeed = parseInt(cellId.replace("Cell-", ""));
+  const cellNum = parseInt(cellId.replace("cell_", ""));
+
+  // Congestion patterns by link
+  const congestionTimes: Record<number, number[]> = {
+    1: [60, 150, 240],
+    2: [100, 200],
+    3: [80],
+    4: [120, 220],
+    5: [70, 160, 250],
+    6: [],
+    7: [],
+    8: [],
+    9: [],
+  };
 
   for (let t = 0; t <= duration; t += 5) {
-    // Base pattern correlated by link
     const linkPhase = (t / 60) * Math.PI + linkSeed * 0.01;
     let throughput =
       cell.avgTraffic +
       (cell.peakTraffic - cell.avgTraffic) * 0.5 * Math.sin(linkPhase);
-
-    // Add congestion spikes at specific times based on link
-    const congestionTimes: Record<number, number[]> = {
-      1: [60, 150, 240],
-      2: [100, 200],
-      3: [],
-      4: [80, 180, 260],
-    };
 
     for (const ct of congestionTimes[linkId] || []) {
       const dist = Math.abs(t - ct);
@@ -46,11 +50,9 @@ function generateCellTrafficData(cellId: string, duration: number = 300) {
       }
     }
 
-    // Small per-cell variation
-    throughput += (Math.sin(t * 0.1 + cellSeed) * 0.1 + Math.random() * 0.05) * cell.avgTraffic;
+    throughput += (Math.sin(t * 0.1 + cellNum) * 0.1 + Math.random() * 0.05) * cell.avgTraffic;
     throughput = Math.max(0, throughput);
 
-    // Packet loss correlates with high throughput and link congestion
     let packetLoss = cell.packetLossRate * 0.3;
     if (throughput > cell.avgTraffic + (cell.peakTraffic - cell.avgTraffic) * 0.5) {
       packetLoss = cell.packetLossRate * (0.8 + Math.random() * 0.4);
@@ -67,14 +69,8 @@ function generateCellTrafficData(cellId: string, duration: number = 300) {
 }
 
 const CELL_COLORS = [
-  "#22d3ee", // cyan
-  "#c084fc", // purple
-  "#facc15", // yellow
-  "#4ade80", // green
-  "#f87171", // red
-  "#60a5fa", // blue
-  "#fb923c", // orange
-  "#a78bfa", // violet
+  "#22d3ee", "#c084fc", "#facc15", "#4ade80",
+  "#f87171", "#60a5fa", "#fb923c", "#a78bfa",
 ];
 
 interface CellTrafficChartProps {
@@ -82,14 +78,14 @@ interface CellTrafficChartProps {
 }
 
 export function CellTrafficChart({ mode }: CellTrafficChartProps) {
-  const [selectedCells, setSelectedCells] = useState<string[]>(["Cell-01", "Cell-02", "Cell-09"]);
+  const [selectedCells, setSelectedCells] = useState<string[]>(["cell_1", "cell_9", "cell_17"]);
 
   const toggleCell = (cellId: string) => {
     setSelectedCells((prev) => {
       if (prev.includes(cellId)) {
         return prev.filter((id) => id !== cellId);
       }
-      if (prev.length >= 8) return prev; // Max 8 cells
+      if (prev.length >= 8) return prev;
       return [...prev, cellId];
     });
   };
@@ -102,28 +98,35 @@ export function CellTrafficChart({ mode }: CellTrafficChartProps) {
       data: generateCellTrafficData(cellId, 300),
     }));
 
-    // Merge by time
+    if (allSeries[0].data.length === 0) return [];
+
     return allSeries[0].data.map((point, i) => {
       const row: Record<string, number> = { time: point.time };
       allSeries.forEach((series) => {
-        row[series.cellId] =
-          mode === "throughput"
-            ? series.data[i].throughput
-            : series.data[i].packetLoss;
+        if (series.data[i]) {
+          row[series.cellId] =
+            mode === "throughput"
+              ? series.data[i].throughput
+              : series.data[i].packetLoss;
+        }
       });
       return row;
     });
   }, [selectedCells, mode]);
 
-  // Group cells by link for the selector
+  // Group cells by link
   const cellsByLink = useMemo(() => {
     const grouped: Record<number, typeof cellTopology> = {};
     cellTopology.forEach((cell) => {
       if (!grouped[cell.linkId]) grouped[cell.linkId] = [];
       grouped[cell.linkId].push(cell);
     });
-    return grouped;
+    return Object.entries(grouped).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
   }, []);
+
+  // Separate shared and isolated links
+  const sharedLinks = cellsByLink.filter(([_, cells]) => cells.length > 1);
+  const isolatedLinks = cellsByLink.filter(([_, cells]) => cells.length === 1);
 
   return (
     <div className="space-y-4">
@@ -132,36 +135,71 @@ export function CellTrafficChart({ mode }: CellTrafficChartProps) {
         <div className="text-xs text-muted-foreground mb-3">
           Select cells to compare (max 8). Cells on the same link show correlated patterns.
         </div>
-        <div className="space-y-3">
-          {Object.entries(cellsByLink).map(([linkId, cells]) => (
-            <div key={linkId} className="flex flex-wrap items-center gap-2">
-              <span
-                className={`text-xs font-medium w-14 ${
-                  linkColorClasses[parseInt(linkId)]?.text || "text-foreground"
-                }`}
-              >
-                Link {linkId}:
-              </span>
-              {cells.map((cell) => (
-                <label
-                  key={cell.cellId}
-                  className={`flex items-center gap-1.5 text-xs cursor-pointer px-2 py-1 rounded border ${
-                    selectedCells.includes(cell.cellId)
-                      ? "border-primary/50 bg-primary/10"
-                      : "border-transparent hover:bg-secondary/50"
-                  }`}
+        
+        {/* Shared links */}
+        <div className="space-y-2 mb-3">
+          {sharedLinks.map(([linkId, cells]) => {
+            const color = linkColors[parseInt(linkId)];
+            return (
+              <div key={linkId} className="flex flex-wrap items-center gap-2">
+                <span
+                  className="text-xs font-medium w-14"
+                  style={{ color }}
                 >
-                  <Checkbox
-                    checked={selectedCells.includes(cell.cellId)}
-                    onCheckedChange={() => toggleCell(cell.cellId)}
-                    className="h-3 w-3"
-                  />
-                  <span className="text-foreground">{cell.cellId.replace("Cell-", "")}</span>
-                </label>
-              ))}
-            </div>
-          ))}
+                  Link_{linkId}:
+                </span>
+                {cells.map((cell) => (
+                  <label
+                    key={cell.cellId}
+                    className={`flex items-center gap-1.5 text-xs cursor-pointer px-2 py-1 rounded border ${
+                      selectedCells.includes(cell.cellId)
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-transparent hover:bg-secondary/50"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selectedCells.includes(cell.cellId)}
+                      onCheckedChange={() => toggleCell(cell.cellId)}
+                      className="h-3 w-3"
+                    />
+                    <span className="text-foreground">{cell.cellId}</span>
+                  </label>
+                ))}
+              </div>
+            );
+          })}
         </div>
+
+        {/* Isolated cells */}
+        {isolatedLinks.length > 0 && (
+          <div className="pt-2 border-t border-border">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground w-14">
+                Isolated:
+              </span>
+              {isolatedLinks.map(([linkId, cells]) => {
+                const cell = cells[0];
+                return (
+                  <label
+                    key={cell.cellId}
+                    className={`flex items-center gap-1.5 text-xs cursor-pointer px-2 py-1 rounded border ${
+                      selectedCells.includes(cell.cellId)
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-transparent hover:bg-secondary/50"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selectedCells.includes(cell.cellId)}
+                      onCheckedChange={() => toggleCell(cell.cellId)}
+                      className="h-3 w-3"
+                    />
+                    <span className="text-foreground">{cell.cellId}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Chart */}
@@ -225,7 +263,7 @@ export function CellTrafficChart({ mode }: CellTrafficChartProps) {
       {selectedCells.length > 1 && (
         <div className="text-xs text-muted-foreground p-3 rounded bg-secondary/20 border border-border">
           <span className="text-foreground font-medium">Observation:</span> Cells on the same 
-          fronthaul link (same color group in selector) show synchronized{" "}
+          fronthaul link show synchronized{" "}
           {mode === "throughput" ? "traffic spikes" : "packet loss events"} during congestion periods.
           This correlation is the basis for topology inference.
         </div>

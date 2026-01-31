@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Network, Play, RefreshCw, Moon, Sun } from "lucide-react";
-import { datasets, calculateLinkData, cellTopology } from "@/data/networkData";
+import { datasets, calculateLinkData, cellTopology, linkColors } from "@/data/networkData";
 import { TopologyTable } from "@/components/TopologyTable";
 import { TrafficChart } from "@/components/TrafficChart";
 import { CellTrafficChart } from "@/components/CellTrafficChart";
@@ -14,6 +14,7 @@ import { CorrelationHeatmap } from "@/components/CorrelationHeatmap";
 import { BufferAnalysis } from "@/components/BufferAnalysis";
 import { SummaryTable } from "@/components/SummaryTable";
 import { InsightsPanel } from "@/components/InsightsPanel";
+import { NetworkTopology3D } from "@/components/NetworkTopology3D";
 
 const Analysis = () => {
   const [selectedDataset, setSelectedDataset] = useState<string>("");
@@ -178,6 +179,19 @@ const Analysis = () => {
               </div>
             </div>
 
+            {/* 3D Network Topology */}
+            <div className="border border-border rounded-lg p-6 bg-card relative">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-primary rounded-full" />
+                3D Network Topology
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Interactive 3D visualization of the inferred fronthaul topology. 
+                BBU at center, cells grouped by shared links.
+              </p>
+              <NetworkTopology3D />
+            </div>
+
             {/* Cell-wise Traffic Visualization */}
             <div className="border border-border rounded-lg p-6 bg-card">
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -217,9 +231,9 @@ const Analysis = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <span className="text-sm text-muted-foreground">Show links:</span>
-                {linkData.map((link) => (
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="text-sm text-muted-foreground">Shared links:</span>
+                {linkData.filter(l => !l.isolated).map((link) => (
                   <label
                     key={link.linkId}
                     className="flex items-center gap-2 cursor-pointer text-sm"
@@ -228,8 +242,23 @@ const Analysis = () => {
                       checked={selectedLinks.includes(link.linkId)}
                       onCheckedChange={() => toggleLink(link.linkId)}
                     />
-                    <span className="text-foreground">
-                      Link {link.linkId} ({link.cells.length} cells)
+                    <span style={{ color: linkColors[link.linkId] }}>
+                      {link.linkName} ({link.cells.length})
+                    </span>
+                  </label>
+                ))}
+                <span className="text-sm text-muted-foreground ml-2">Isolated:</span>
+                {linkData.filter(l => l.isolated).map((link) => (
+                  <label
+                    key={link.linkId}
+                    className="flex items-center gap-2 cursor-pointer text-sm"
+                  >
+                    <Checkbox
+                      checked={selectedLinks.includes(link.linkId)}
+                      onCheckedChange={() => toggleLink(link.linkId)}
+                    />
+                    <span className="text-muted-foreground">
+                      {link.linkName}
                     </span>
                   </label>
                 ))}
