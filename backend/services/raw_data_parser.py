@@ -12,9 +12,6 @@ Data is merged and aggregated to provide:
 - cell_id: Cell identifier (1-24)
 - throughput: Aggregated throughput per slot (kbit)
 - packet_loss: txPackets - rxPackets + tooLateRxPackets
-
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import os

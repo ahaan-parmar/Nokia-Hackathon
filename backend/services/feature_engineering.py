@@ -16,9 +16,6 @@ Design Principles:
 - Non-destructive: Creates NEW dataset, preserves original columns
 - Deterministic: Uses fixed random seeds, reproducible results
 - Explainable: Each feature has clear interpretation for congestion prediction
-
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import pandas as pd

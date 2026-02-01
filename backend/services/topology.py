@@ -12,12 +12,6 @@ Algorithm:
     2. Add edges between cells with correlation >= threshold
     3. Find connected components (cells reachable through high-correlation edges)
     4. Assign each component a unique link label
-
-This is a deterministic, explainable approach using connected components
-analysis - no machine learning involved.
-
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 

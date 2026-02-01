@@ -11,9 +11,6 @@ workflow:
     1. map cells to links using inferred topology
     2. sum traffic from all cells on the same link per slot
     3. output one row per slot with columns for each link
-
-author: nokia hackathon team
-date: january 2026
 """
 
 import pandas as pd

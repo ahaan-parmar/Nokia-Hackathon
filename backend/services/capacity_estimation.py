@@ -10,9 +10,6 @@ to peak traffic to avoid any packet loss.
 capacity estimation approaches:
     1. no buffer: capacity = max(traffic) across all slots
     2. with buffer: capacity can be lower if bursts are absorbed (separate function)
-
-author: nokia hackathon team
-date: january 2026
 """
 
 import pandas as pd

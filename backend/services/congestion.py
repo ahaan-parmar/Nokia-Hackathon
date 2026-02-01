@@ -13,9 +13,6 @@ Rationale:
     and that link becomes congested, affected cells exhibit packet loss.
     This simple threshold-based approach provides explainable results
     suitable for academic evaluation.
-
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import pandas as pd

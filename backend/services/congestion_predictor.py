@@ -19,9 +19,6 @@ Design Principles:
 - Deterministic: Fixed random seeds for reproducibility
 - Explainable: Feature importance available for all models
 - Non-destructive: Extends existing pipeline, no modifications
-
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import numpy as np

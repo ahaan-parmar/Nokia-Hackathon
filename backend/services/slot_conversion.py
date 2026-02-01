@@ -10,9 +10,6 @@ in 5g fronthaul networks:
 
 this module aggregates throughput measurements from symbol granularity
 to slot granularity, which is required for capacity estimation.
-
-author: nokia hackathon team
-date: january 2026
 """
 
 import pandas as pd
