@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Network, Play, RefreshCw, Moon, Sun, Loader2, AlertCircle, Zap } from "lucide-react";
+import { Radio, Play, RefreshCw, Moon, Sun, Loader2, AlertCircle, Zap, Network } from "lucide-react";
 import { datasets, calculateLinkData, cellTopology, linkColors, CellData, LinkData } from "@/data/networkData";
 import { TopologyTable } from "@/components/TopologyTable";
 import { TrafficChart } from "@/components/TrafficChart";
@@ -185,27 +185,37 @@ const Analysis = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 transition-all hover:bg-primary/20">
-              <Network className="w-5 h-5 text-primary" />
+      <header className="border-b border-primary/20 sticky top-0 bg-gradient-to-r from-background via-primary/5 to-background backdrop-blur-md z-50">
+        <div className="container mx-auto px-8 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <div className="p-3 rounded-xl border border-nokia/20 bg-nokia/10">
+              <Radio className="w-6 h-6 text-nokia" />
             </div>
-            <span className="font-semibold text-foreground">Fronthaul Analyzer</span>
+            <div className="flex flex-col gap-0.5">
+              <h1 className="font-black text-foreground text-2xl tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                FRONTHAUL NETWORK ANALYZER
+              </h1>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground font-medium">by</span>
+                <span className="text-sm font-bold text-transparent bg-gradient-to-r from-nokia to-nokia-light bg-clip-text">Team Phish & Chips</span>
+                <span className="text-muted-foreground/50">•</span>
+                <span className="text-sm text-muted-foreground/80 font-medium">LoveLace Hackathon 2026</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={() => setDarkMode(!darkMode)}
-              className="h-9 w-9 transition-all hover:scale-105"
+              className="h-10 w-10 transition-all hover:scale-110 hover:bg-primary/10 rounded-xl"
             >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
 
             {analysisRun && (
-              <Button variant="outline" onClick={handleReset} className="gap-2 transition-all hover:scale-105">
+              <Button variant="outline" onClick={handleReset} className="gap-2 transition-all hover:scale-105 border-primary/30 hover:border-primary/50 hover:bg-primary/5 h-10 px-5 rounded-xl font-semibold">
                 <RefreshCw className="w-4 h-4" />
                 Reset
               </Button>
@@ -216,88 +226,134 @@ const Analysis = () => {
 
       <main className="container mx-auto px-6 py-8">
         {/* Controls */}
-        <div className="border border-border rounded-lg p-6 mb-8 bg-card animate-fade-in">
-          <h2 className="text-sm font-medium text-muted-foreground mb-6">
-            Analysis Configuration
-          </h2>
+        <div className="border border-nokia/20 rounded-2xl p-8 mb-8 bg-gradient-to-br from-card via-card to-nokia/5 animate-fade-in relative overflow-hidden group">
+          {/* Subtle animated background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-nokia/5 via-transparent to-nokia/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-4">
-              <Label className="text-sm text-muted-foreground w-24">Dataset</Label>
-              <Select value={selectedDataset} onValueChange={setSelectedDataset}>
-                <SelectTrigger className="bg-background border-border h-10 w-[350px] transition-all hover:border-primary/50">
-                  <SelectValue placeholder="Choose a dataset..." />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  {datasets.map((dataset) => (
-                    <SelectItem
-                      key={dataset.id}
-                      value={dataset.id}
-                      className="py-2 transition-colors"
-                      disabled={dataset.id === "live-analysis" && backendAvailable === false}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>{dataset.name}</span>
-                        {dataset.id === "live-analysis" && (
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded transition-all ${backendAvailable === true
-                            ? "bg-green-500/20 text-green-400"
-                            : backendAvailable === false
-                              ? "bg-red-500/20 text-red-400"
-                              : "bg-yellow-500/20 text-yellow-400"
-                            }`}>
-                            {backendAvailable === true ? "Online" : backendAvailable === false ? "Offline" : "Checking..."}
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div className="flex items-center gap-3 h-10 px-4 rounded-lg bg-secondary/50 transition-all hover:bg-secondary/70">
-                <Switch
-                  id="buffer-mode"
-                  checked={withBuffer}
-                  onCheckedChange={setWithBuffer}
-                  className="data-[state=checked]:bg-primary"
-                />
-                <Label htmlFor="buffer-mode" className="text-sm whitespace-nowrap">
-                  {withBuffer ? "With Buffer (4 symbols)" : "Without Buffer"}
-                </Label>
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 rounded-xl bg-nokia/10">
+                <Zap className="w-5 h-5 text-nokia" />
               </div>
-
-              <Button
-                onClick={handleRunAnalysis}
-                disabled={!selectedDataset || isLoading}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-6 h-10 transition-all hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" />
-                    Run Analysis
-                  </>
-                )}
-              </Button>
+              <div>
+                <h2 className="text-lg font-bold text-foreground">
+                  Analysis Configuration
+                </h2>
+                <p className="text-sm text-muted-foreground">Configure your topology inference analysis</p>
+              </div>
             </div>
 
-            {selectedDataset && (
-              <div className="text-xs text-muted-foreground pl-28 animate-fade-in">
-                {datasets.find(d => d.id === selectedDataset)?.description}
-                {" • "}
-                <span className="font-mono text-muted-foreground/60">
-                  {datasets.find(d => d.id === selectedDataset)?.source}
-                </span>
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Dataset Selection Card */}
+              <div className="p-5 rounded-xl bg-background/50 border border-border hover:border-nokia/30 transition-all duration-300 hover:shadow-lg hover:shadow-nokia/5">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3 block">
+                  Data Source
+                </Label>
+                <Select value={selectedDataset} onValueChange={setSelectedDataset}>
+                  <SelectTrigger className="bg-background border-border h-12 w-full transition-all hover:border-nokia/50 rounded-xl text-base">
+                    <SelectValue placeholder="Select dataset..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border rounded-xl">
+                    {datasets.map((dataset) => (
+                      <SelectItem
+                        key={dataset.id}
+                        value={dataset.id}
+                        className="py-3 transition-colors rounded-lg"
+                        disabled={dataset.id === "live-analysis" && backendAvailable === false}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{dataset.name}</span>
+                          {dataset.id === "live-analysis" && (
+                            <span className={`text-[10px] px-2 py-1 rounded-full font-semibold transition-all ${backendAvailable === true
+                              ? "bg-green-500/20 text-green-400"
+                              : backendAvailable === false
+                                ? "bg-red-500/20 text-red-400"
+                                : "bg-yellow-500/20 text-yellow-400"
+                              }`}>
+                              {backendAvailable === true ? "● Online" : backendAvailable === false ? "● Offline" : "● Checking"}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedDataset && (
+                  <p className="text-xs text-muted-foreground mt-3 leading-relaxed animate-fade-in">
+                    {datasets.find(d => d.id === selectedDataset)?.description}
+                  </p>
+                )}
               </div>
-            )}
+
+              {/* Buffer Configuration Card */}
+              <div className="p-5 rounded-xl bg-background/50 border border-border hover:border-nokia/30 transition-all duration-300 hover:shadow-lg hover:shadow-nokia/5">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3 block">
+                  Buffer Mode
+                </Label>
+                <div
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${withBuffer
+                    ? 'border-nokia bg-nokia/10 shadow-lg shadow-nokia/10'
+                    : 'border-border hover:border-muted-foreground/30'
+                    }`}
+                  onClick={() => setWithBuffer(!withBuffer)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${withBuffer ? 'bg-nokia text-white' : 'bg-muted text-muted-foreground'
+                        }`}>
+                        <span className="font-bold text-sm">4</span>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-foreground">
+                          {withBuffer ? "4-Symbol Buffer" : "No Buffer"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {withBuffer ? "143µs delay, 1% loss tolerance" : "Zero delay, strict capacity"}
+                        </div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={withBuffer}
+                      onCheckedChange={setWithBuffer}
+                      className="data-[state=checked]:bg-nokia"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Run Analysis Card */}
+              <div className="p-5 rounded-xl bg-background/50 border border-border hover:border-nokia/30 transition-all duration-300 hover:shadow-lg hover:shadow-nokia/5 flex flex-col justify-between">
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3 block">
+                    Execute
+                  </Label>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Run topology inference on selected dataset
+                  </p>
+                </div>
+                <Button
+                  onClick={handleRunAnalysis}
+                  disabled={!selectedDataset || isLoading}
+                  className="w-full bg-gradient-to-r from-nokia to-nokia-light text-white hover:from-nokia-dark hover:to-nokia gap-3 h-14 text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-nokia/30 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5" />
+                      Run Analysis
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-red-400 pl-28 animate-slide-in-right">
-                <AlertCircle className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-sm text-red-400 mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-slide-in-right">
+                <AlertCircle className="w-5 h-5" />
                 {error}
               </div>
             )}
@@ -306,51 +362,45 @@ const Analysis = () => {
 
         {/* Live Data Summary Banner */}
         {analysisRun && isLiveMode && liveSummary && (
-          <div className="border border-green-500/30 rounded-lg p-5 mb-8 bg-green-500/5 relative overflow-hidden animate-slide-up">
-            {/* Flowing data effect */}
-            <div className="absolute inset-0 data-flow-bg opacity-30" />
-
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative">
-                  <Zap className="w-6 h-6 text-green-400" />
-                  <div className="absolute inset-0 animate-ping">
-                    <Zap className="w-6 h-6 text-green-400 opacity-50" />
-                  </div>
-                </div>
-                <span className="font-semibold text-green-400 text-lg">Live Analysis Results</span>
+          <div className="rounded-2xl p-6 mb-8 bg-card border border-border animate-slide-up">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-nokia/10">
+                <Zap className="w-5 h-5 text-nokia" />
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="animate-slide-up stagger-1">
-                  <div className="text-muted-foreground text-sm mb-1">Data Points</div>
-                  <div className="text-2xl font-bold text-foreground">
-                    <AnimatedCounter value={liveSummary.total_data_points} duration={1500} />
-                  </div>
-                </div>
-                <div className="animate-slide-up stagger-2">
-                  <div className="text-muted-foreground text-sm mb-1">Cells Analyzed</div>
-                  <div className="text-2xl font-bold text-foreground">
-                    <AnimatedCounter value={liveSummary.total_cells} duration={800} />
-                  </div>
-                </div>
-                <div className="animate-slide-up stagger-3">
-                  <div className="text-muted-foreground text-sm mb-1">Inferred Links</div>
-                  <div className="text-2xl font-bold text-foreground">
-                    <AnimatedCounter value={liveSummary.inferred_links} duration={800} />
-                  </div>
-                </div>
-                <div className="animate-slide-up stagger-4">
-                  <div className="text-muted-foreground text-sm mb-1">Congestion Events</div>
-                  <div className="text-2xl font-bold text-foreground">
-                    <AnimatedCounter value={liveSummary.congestion_events} duration={1200} />
-                  </div>
-                </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Live Analysis Complete</h3>
+                <p className="text-xs text-muted-foreground">{liveSummary.algorithm} • {liveSummary.data_source}</p>
               </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs text-green-500 font-medium">Connected</span>
+              </div>
+            </div>
 
-              <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                Algorithm: {liveSummary.algorithm} • Source: {liveSummary.data_source}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="text-center p-4 rounded-xl bg-muted/30">
+                <div className="text-3xl font-bold text-foreground mb-1">
+                  <AnimatedCounter value={liveSummary.total_data_points} duration={1500} />
+                </div>
+                <div className="text-xs text-muted-foreground">Data Points</div>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-muted/30">
+                <div className="text-3xl font-bold text-foreground mb-1">
+                  <AnimatedCounter value={liveSummary.total_cells} duration={800} />
+                </div>
+                <div className="text-xs text-muted-foreground">Cells</div>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-muted/30">
+                <div className="text-3xl font-bold text-nokia mb-1">
+                  <AnimatedCounter value={liveSummary.inferred_links} duration={800} />
+                </div>
+                <div className="text-xs text-muted-foreground">Links Inferred</div>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-muted/30">
+                <div className="text-3xl font-bold text-foreground mb-1">
+                  <AnimatedCounter value={liveSummary.congestion_events} duration={1200} />
+                </div>
+                <div className="text-xs text-muted-foreground">Congestion Events</div>
               </div>
             </div>
           </div>
