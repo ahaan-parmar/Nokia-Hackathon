@@ -10,8 +10,6 @@ used in topology inference analysis. Supports both:
 
 All validation is deterministic and produces clear, readable error messages.
 
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import os

@@ -20,8 +20,6 @@ Rationale:
     simultaneously when that link is saturated. High correlation
     suggests shared infrastructure.
 
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import pandas as pd

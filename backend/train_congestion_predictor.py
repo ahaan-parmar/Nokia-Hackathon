@@ -16,9 +16,6 @@ Outputs:
 - data/model_metrics.json: Model comparison metrics
 - data/congestion_predictions.csv: Sample predictions with risk scores
 - data/feature_importance.json: Feature importance from best model
-
-Author: Nokia Hackathon Team
-Date: January 2026
 """
 
 import os
